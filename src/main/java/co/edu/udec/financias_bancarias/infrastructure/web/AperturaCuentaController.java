@@ -26,11 +26,9 @@ public class AperturaCuentaController {
     @PostMapping("/abrir")
     public ResponseEntity<CuentaResponse> abrirCuenta(@RequestBody AperturaCuentaRequest request) {
         try {
-            // Convertir strings a enums
             TipoCuenta tipoCuenta = TipoCuenta.valueOf(request.tipoCuenta().toUpperCase());
             TipoArmotizacion tipoAmortizacion = TipoArmotizacion.valueOf(request.tipoAmortizacion().toUpperCase());
             
-            // Ejecutar el caso de uso
             Cuenta cuentaCreada = aperturaCuentaUseCase.abrirCuenta(
                 request.clienteId(),
                 tipoCuenta,
@@ -39,7 +37,6 @@ public class AperturaCuentaController {
                 tipoAmortizacion
             );
             
-            // Convertir a respuesta
             CuentaResponse response = new CuentaResponse(
                 cuentaCreada.getCcc().toString(),
                 cuentaCreada.getTipo().name(),
@@ -61,7 +58,6 @@ public class AperturaCuentaController {
         }
     }
     
-    // Records para request y response
     public record AperturaCuentaRequest(
         String clienteId,
         String tipoCuenta,

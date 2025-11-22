@@ -27,10 +27,9 @@ public class InMemorySucursalRepository implements SucursalRepositoryPort {
     
     @Override
     public Sucursal buscarPorId(String sucursalId) {
-        Sucursal sucursal = sucursales.get(sucursalId);
-        if (sucursal == null) {
-            throw new SucursalNoEncontradaException(sucursalId);
-        }
-        return sucursal;
+        return sucursales.values().stream()
+            .filter(s -> s.getNumero().equals(sucursalId))
+            .findFirst()
+            .orElseThrow(() -> new SucursalNoEncontradaException(sucursalId));
     }
 }

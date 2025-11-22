@@ -12,7 +12,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public class InMemoryCuentaRepository implements CuentaRepositoryPort {
@@ -28,10 +27,9 @@ public class InMemoryCuentaRepository implements CuentaRepositoryPort {
     
     @Override
     public Cuenta buscarPorCCC(CodigoCuentaCliente ccc) {
-        Optional<Cuenta> cuenta = cuentas.stream()
+        return cuentas.stream()
             .filter(c -> c.getCcc().equals(ccc))
-            .findFirst();
-
-        return cuenta.orElseThrow(() -> new CuentaNoEncontradaException(ccc.toString()));
+            .findFirst()
+            .orElseThrow(() -> new CuentaNoEncontradaException(ccc.toString()));
     }
 } 

@@ -21,7 +21,6 @@ public class InMemoryClienteRepository implements ClienteRepositoryPort {
     private final Map<ClienteId, Cliente> clientes = new HashMap<>();
     
     public InMemoryClienteRepository() {
-        // Datos de prueba
         ClienteId clienteId1 = new ClienteId("CLI-001");
         Direccion direccion1 = new Direccion("Calle 123", "Bogotá", "11001");
         Cliente cliente1 = new Cliente(clienteId1, "Juan Pérez", direccion1, ClienteTipo.PERSONA);
@@ -33,10 +32,9 @@ public class InMemoryClienteRepository implements ClienteRepositoryPort {
     
     @Override
     public Cliente buscarPorId(ClienteId clienteId) {
-        Cliente cliente = clientes.get(clienteId);
-        if (cliente == null) {
-            throw new ClienteNoEncontradoException(clienteId.value());
-        }
-        return cliente;
+        return clientes.values().stream()
+            .filter(c -> c.getId().equals(clienteId))
+            .findFirst()
+            .orElseThrow(() -> new ClienteNoEncontradoException(clienteId.value()));
     }
 }
