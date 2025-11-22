@@ -4,8 +4,8 @@
  */
 package co.edu.udec.financias_bancarias.domain.exceptions;
 
-public class CuentaException extends RuntimeException {
-    public CuentaException(String message) { 
-        super(message); 
+public class SucursalNoEncontradaException extends CuentaException {
+    public SucursalNoEncontradaException(String sucursalId) {
+        super("Sucursal no encontrada con ID: " + sucursalId);
     }
 }

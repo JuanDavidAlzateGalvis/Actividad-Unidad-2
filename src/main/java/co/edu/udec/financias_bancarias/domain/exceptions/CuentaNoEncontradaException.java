@@ -4,8 +4,8 @@
  */
 package co.edu.udec.financias_bancarias.domain.exceptions;
 
-public class CuentaException extends RuntimeException {
-    public CuentaException(String message) { 
-        super(message); 
+public class CuentaNoEncontradaException extends CuentaException {
+    public CuentaNoEncontradaException(String cuentaId) {
+        super("Cuenta no encontrada: " + cuentaId);
     }
 }

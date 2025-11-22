@@ -4,13 +4,14 @@
 
 package co.edu.udec.financias_bancarias;
 
-/**
- *
- * @author juana
- */
-public class Financias_Bancarias {
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+@SpringBootApplication
+public class Financias_Bancarias {
     public static void main(String[] args) {
-        System.out.println("Hello World!");
+        SpringApplication.run(Financias_Bancarias.class, args);
+        System.out.println("🚀 Aplicación de Finanzas Bancarias iniciada!");
+        System.out.println("📝 Endpoint disponible: POST http://localhost:8080/api/cuentas/abrir");
     }
 }
