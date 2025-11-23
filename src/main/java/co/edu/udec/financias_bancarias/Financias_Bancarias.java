@@ -17,8 +17,6 @@ public class Financias_Bancarias {
         return args -> {
             System.out.println("✅ BACKEND SPRING BOOT INICIADO CORRECTAMENTE");
             System.out.println("✅ Base de datos PostgreSQL: CONECTADA");
-            System.out.println("✅ Repositorios: FUNCIONANDO");
-            System.out.println("✅ Casos de uso: LISTOS");
         };
     }
 }

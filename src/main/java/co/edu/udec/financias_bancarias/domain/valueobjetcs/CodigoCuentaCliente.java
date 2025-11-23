@@ -15,8 +15,19 @@ public record CodigoCuentaCliente(String bancoId, String sucursalId, String nume
         if (numeroCuenta == null || numeroCuenta.isBlank()) throw new IllegalArgumentException("numeroCuenta inválido");
     }
 
+    public static CodigoCuentaCliente fromString(String ccc) {
+        if (ccc == null || ccc.isBlank()) {
+            throw new IllegalArgumentException("CCC no puede ser nulo o vacío");
+        }
+        String[] partes = ccc.split("-");
+        if (partes.length != 3) {
+            throw new IllegalArgumentException("Formato de CCC inválido. Debe ser: bancoId-sucursalId-numeroCuenta");
+        }
+        return new CodigoCuentaCliente(partes[0], partes[1], partes[2]);
+    }
+
     @Override
-        public String toString() {
+    public String toString() {
         return bancoId + "-" + sucursalId + "-" + numeroCuenta;
     }
 }

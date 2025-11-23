@@ -30,9 +30,9 @@ public class MainLauncher {
                 AperturaCuentaLauncher.main(new String[]{});
             });
             
-            // Futuros flujos
             btnTransferencia.addActionListener(e -> {
-                JOptionPane.showMessageDialog(mainFrame, "Flujo en desarrollo");
+                mainFrame.dispose();
+                RealizarTransferenciaLauncher.main(new String[]{});
             });
             
             btnConsulta.addActionListener(e -> {

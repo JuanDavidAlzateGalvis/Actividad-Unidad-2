@@ -58,6 +58,13 @@ public class Cuenta {
     private void recalcularSaldoMedio() {
         this.saldoMedio = (this.saldoMedio.add(this.saldoActual)).divide(new BigDecimal("2"));
     }
+    
+    public void setSaldoMedio(BigDecimal saldoMedio) {
+        if (saldoMedio == null || saldoMedio.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("saldoMedio inválido");
+        }
+        this.saldoMedio = saldoMedio;
+    }
 
     public CodigoCuentaCliente getCcc() { return ccc; }
     public TipoCuenta getTipo() { return tipo; }

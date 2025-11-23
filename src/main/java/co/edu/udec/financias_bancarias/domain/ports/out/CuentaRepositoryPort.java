@@ -10,4 +10,5 @@ import co.edu.udec.financias_bancarias.domain.valueobjetcs.CodigoCuentaCliente;
 public interface CuentaRepositoryPort {
     void guardar(Cuenta cuenta);
     Cuenta buscarPorCCC(CodigoCuentaCliente ccc);
+    void actualizar(Cuenta cuenta);
 }

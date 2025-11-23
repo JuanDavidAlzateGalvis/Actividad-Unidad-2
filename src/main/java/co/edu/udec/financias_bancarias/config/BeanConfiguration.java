@@ -5,10 +5,13 @@
 package co.edu.udec.financias_bancarias.config;
 
 import co.edu.udec.financias_bancarias.application.usecases.AperturaCuentaUseCaseImpl;
+import co.edu.udec.financias_bancarias.application.usecases.RealizarTransferenciaUseCaseImpl;
 import co.edu.udec.financias_bancarias.domain.ports.in.AperturaCuentaUseCase;
+import co.edu.udec.financias_bancarias.domain.ports.in.RealizarTransferenciaUseCase;
 import co.edu.udec.financias_bancarias.domain.ports.out.ClienteRepositoryPort;
 import co.edu.udec.financias_bancarias.domain.ports.out.SucursalRepositoryPort;
 import co.edu.udec.financias_bancarias.domain.ports.out.CuentaRepositoryPort;
+import co.edu.udec.financias_bancarias.domain.ports.out.TransaccionRepositoryPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -26,5 +29,14 @@ public class BeanConfiguration {
             cuentaRepositoryPort
         );
     }
-
+    
+    @Bean
+    public RealizarTransferenciaUseCase realizarTransferenciaUseCase(
+            CuentaRepositoryPort cuentaRepositoryPort,
+            TransaccionRepositoryPort transaccionRepositoryPort) {
+        return new RealizarTransferenciaUseCaseImpl(
+            cuentaRepositoryPort,
+            transaccionRepositoryPort
+        );
+    }
 }
