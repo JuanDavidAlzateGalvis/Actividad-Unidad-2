@@ -15,7 +15,9 @@ import co.edu.udec.financias_bancarias.domain.model.Cuenta;
 import co.edu.udec.financias_bancarias.domain.valueobjetcs.ClienteId;
 
 import java.math.BigDecimal;
+import org.springframework.stereotype.Component;
 
+@Component
 public class AperturaCuentaUseCaseImpl implements AperturaCuentaUseCase {
     
     private final ClienteRepositoryPort clienteRepository;
@@ -36,25 +38,21 @@ public class AperturaCuentaUseCaseImpl implements AperturaCuentaUseCase {
     public Cuenta abrirCuenta(String clienteId, TipoCuenta tipoCuenta,
                              BigDecimal depositoInicial, String sucursalId,
                              TipoArmotizacion tipoAmortizacion) {
-        
-        // Validaciones básicas
+
         if (clienteId == null || clienteId.isBlank()) {
             throw new IllegalArgumentException("ID de cliente es requerido");
         }
         if (sucursalId == null || sucursalId.isBlank()) {
             throw new IllegalArgumentException("ID de sucursal es requerido");
         }
-        
-        // 1. Buscar entidades necesarias usando los puertos de salida
+
         var cliente = clienteRepository.buscarPorId(new ClienteId(clienteId));
         var sucursal = sucursalRepository.buscarPorId(sucursalId);
-        
-        // 2. Usar el servicio de dominio existente para crear la cuenta
+
         Cuenta nuevaCuenta = aperturaService.abrirCuenta(
             cliente, tipoCuenta, depositoInicial, sucursal, tipoAmortizacion
         );
-        
-        // 3. Persistir la cuenta usando el puerto de salida
+
         cuentaRepository.guardar(nuevaCuenta);
         
         return nuevaCuenta;
