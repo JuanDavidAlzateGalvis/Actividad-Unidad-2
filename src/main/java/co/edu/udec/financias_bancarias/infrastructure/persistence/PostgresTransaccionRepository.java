@@ -6,10 +6,14 @@ package co.edu.udec.financias_bancarias.infrastructure.persistence;
 
 import co.edu.udec.financias_bancarias.domain.ports.out.TransaccionRepositoryPort;
 import co.edu.udec.financias_bancarias.domain.model.Transaccion;
+import co.edu.udec.financias_bancarias.domain.valueobjetcs.CodigoCuentaCliente;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 public class PostgresTransaccionRepository implements TransaccionRepositoryPort {
@@ -22,41 +26,119 @@ public class PostgresTransaccionRepository implements TransaccionRepositoryPort 
 
     @Override
     public void guardar(Transaccion transaccion) {
-        String sql = "INSERT INTO transacciones (cuenta_origen_banco_id, cuenta_origen_sucursal_id, cuenta_origen_numero_cuenta, " +
-                "cuenta_destino_banco_id, cuenta_destino_sucursal_id, cuenta_destino_numero_cuenta, " +
-                "monto, fecha, tipo, descripcion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    }
 
+    @Override
+    public List<Transaccion> buscarPorCuentaOrigenODestino(CodigoCuentaCliente ccc) {
+        String sql = "SELECT * FROM transacciones WHERE (cuenta_origen_banco_id = ? AND cuenta_origen_sucursal_id = ? AND cuenta_origen_numero_cuenta = ?) " +
+                     "OR (cuenta_destino_banco_id = ? AND cuenta_destino_sucursal_id = ? AND cuenta_destino_numero_cuenta = ?) " +
+                     "ORDER BY fecha DESC";
+        
+        List<Transaccion> transacciones = new ArrayList<>();
+        
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            stmt.setString(1, transaccion.getCuentaOrigen().bancoId());
-            stmt.setString(2, transaccion.getCuentaOrigen().sucursalId());
-            stmt.setString(3, transaccion.getCuentaOrigen().numeroCuenta());
-            stmt.setString(4, transaccion.getCuentaDestino().bancoId());
-            stmt.setString(5, transaccion.getCuentaDestino().sucursalId());
-            stmt.setString(6, transaccion.getCuentaDestino().numeroCuenta());
-            stmt.setBigDecimal(7, transaccion.getMonto());
-            stmt.setTimestamp(8, Timestamp.valueOf(transaccion.getFecha()));
-            stmt.setString(9, transaccion.getTipo());
-            stmt.setString(10, transaccion.getDescripcion());
-
-            int affectedRows = stmt.executeUpdate();
-            if (affectedRows == 0) {
-                throw new SQLException("No se pudo guardar la transacción, ninguna fila afectada.");
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, ccc.bancoId());
+            stmt.setString(2, ccc.sucursalId());
+            stmt.setString(3, ccc.numeroCuenta());
+            stmt.setString(4, ccc.bancoId());
+            stmt.setString(5, ccc.sucursalId());
+            stmt.setString(6, ccc.numeroCuenta());
+            
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                transacciones.add(mapearATransaccion(rs));
             }
-
-            // Obtener el ID generado
-            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    long id = generatedKeys.getLong(1);
-                    System.out.println("✅ Transacción guardada con ID: " + id);
-                } else {
-                    throw new SQLException("No se pudo obtener el ID de la transacción guardada.");
-                }
-            }
-
+            
         } catch (SQLException e) {
-            throw new RuntimeException("Error al guardar transacción en PostgreSQL: " + e.getMessage(), e);
+            throw new RuntimeException("Error al buscar transacciones por cuenta: " + e.getMessage(), e);
         }
+        
+        return transacciones;
+    }
+
+    @Override
+    public List<Transaccion> buscarPorCuentaYFechas(CodigoCuentaCliente ccc, LocalDateTime fechaInicio, LocalDateTime fechaFin) {
+        String sql = "SELECT * FROM transacciones WHERE ((cuenta_origen_banco_id = ? AND cuenta_origen_sucursal_id = ? AND cuenta_origen_numero_cuenta = ?) " +
+                     "OR (cuenta_destino_banco_id = ? AND cuenta_destino_sucursal_id = ? AND cuenta_destino_numero_cuenta = ?)) " +
+                     "AND fecha BETWEEN ? AND ? ORDER BY fecha DESC";
+        
+        List<Transaccion> transacciones = new ArrayList<>();
+        
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, ccc.bancoId());
+            stmt.setString(2, ccc.sucursalId());
+            stmt.setString(3, ccc.numeroCuenta());
+            stmt.setString(4, ccc.bancoId());
+            stmt.setString(5, ccc.sucursalId());
+            stmt.setString(6, ccc.numeroCuenta());
+            stmt.setTimestamp(7, Timestamp.valueOf(fechaInicio));
+            stmt.setTimestamp(8, Timestamp.valueOf(fechaFin));
+            
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                transacciones.add(mapearATransaccion(rs));
+            }
+            
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al buscar transacciones por cuenta y fechas: " + e.getMessage(), e);
+        }
+        
+        return transacciones;
+    }
+
+    @Override
+    public List<Transaccion> buscarPorCliente(String clienteId) {
+        String sql = "SELECT t.* FROM transacciones t " +
+                     "JOIN cuentas c_origen ON t.cuenta_origen_banco_id = c_origen.banco_id AND t.cuenta_origen_sucursal_id = c_origen.sucursal_id AND t.cuenta_origen_numero_cuenta = c_origen.numero_cuenta " +
+                     "JOIN cuentas c_destino ON t.cuenta_destino_banco_id = c_destino.banco_id AND t.cuenta_destino_sucursal_id = c_destino.sucursal_id AND t.cuenta_destino_numero_cuenta = c_destino.numero_cuenta " +
+                     "WHERE c_origen.cliente_id = ? OR c_destino.cliente_id = ? " +
+                     "ORDER BY t.fecha DESC";
+        
+        List<Transaccion> transacciones = new ArrayList<>();
+        
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, clienteId);
+            stmt.setString(2, clienteId);
+            
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                transacciones.add(mapearATransaccion(rs));
+            }
+            
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al buscar transacciones por cliente: " + e.getMessage(), e);
+        }
+        
+        return transacciones;
+    }
+
+    private Transaccion mapearATransaccion(ResultSet rs) throws SQLException {
+        CodigoCuentaCliente cuentaOrigen = new CodigoCuentaCliente(
+            rs.getString("cuenta_origen_banco_id"),
+            rs.getString("cuenta_origen_sucursal_id"),
+            rs.getString("cuenta_origen_numero_cuenta")
+        );
+        
+        CodigoCuentaCliente cuentaDestino = new CodigoCuentaCliente(
+            rs.getString("cuenta_destino_banco_id"),
+            rs.getString("cuenta_destino_sucursal_id"),
+            rs.getString("cuenta_destino_numero_cuenta")
+        );
+        
+        return new Transaccion(
+            rs.getLong("id"),
+            cuentaOrigen,
+            cuentaDestino,
+            rs.getBigDecimal("monto"),
+            rs.getTimestamp("fecha").toLocalDateTime(),
+            rs.getString("tipo"),
+            rs.getString("descripcion")
+        );
     }
 }
