@@ -36,7 +36,8 @@ public class MainLauncher {
             });
             
             btnConsulta.addActionListener(e -> {
-                JOptionPane.showMessageDialog(mainFrame, "Flujo en desarrollo");
+                mainFrame.dispose();
+                ConsultasLauncher.main(new String[]{});
             });
             
             btnReportes.addActionListener(e -> {

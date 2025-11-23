@@ -16,6 +16,8 @@ import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 public class PostgresClienteRepository implements ClienteRepositoryPort {
@@ -45,6 +47,26 @@ public class PostgresClienteRepository implements ClienteRepositoryPort {
         } catch (SQLException e) {
             throw new RuntimeException("Error al buscar cliente en PostgreSQL: " + e.getMessage(), e);
         }
+    }
+    
+    @Override
+    public List<Cliente> buscarTodos() {
+        String sql = "SELECT * FROM clientes ORDER BY nombre";
+        List<Cliente> clientes = new ArrayList<>();
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                clientes.add(mapearACliente(rs));
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al buscar todos los clientes: " + e.getMessage(), e);
+        }
+
+        return clientes;
     }
     
     private Cliente mapearACliente(ResultSet rs) throws SQLException {
@@ -83,4 +105,15 @@ public class PostgresClienteRepository implements ClienteRepositoryPort {
         
         return cliente;
     }
+
+
+    
+
 }
+
+
+
+
+
+    
+

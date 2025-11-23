@@ -29,7 +29,7 @@ public class PostgresTransaccionRepository implements TransaccionRepositoryPort 
     }
 
     @Override
-    public List<Transaccion> buscarPorCuentaOrigenODestino(CodigoCuentaCliente ccc) {
+    public List<Transaccion> buscarPorCuenta(CodigoCuentaCliente ccc) {
         String sql = "SELECT * FROM transacciones WHERE (cuenta_origen_banco_id = ? AND cuenta_origen_sucursal_id = ? AND cuenta_origen_numero_cuenta = ?) " +
                      "OR (cuenta_destino_banco_id = ? AND cuenta_destino_sucursal_id = ? AND cuenta_destino_numero_cuenta = ?) " +
                      "ORDER BY fecha DESC";

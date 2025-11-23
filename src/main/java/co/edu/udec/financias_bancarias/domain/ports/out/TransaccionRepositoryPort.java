@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 public interface TransaccionRepositoryPort {
     void guardar(Transaccion transaccion);
-    List<Transaccion> buscarPorCuentaOrigenODestino(CodigoCuentaCliente ccc);
+    List<Transaccion> buscarPorCuenta(CodigoCuentaCliente ccc);
     List<Transaccion> buscarPorCuentaYFechas(CodigoCuentaCliente ccc, LocalDateTime fechaInicio, LocalDateTime fechaFin);
     List<Transaccion> buscarPorCliente(String clienteId);
 }
