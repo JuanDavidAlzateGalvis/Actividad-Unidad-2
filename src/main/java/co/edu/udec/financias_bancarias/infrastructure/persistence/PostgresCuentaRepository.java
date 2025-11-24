@@ -21,6 +21,8 @@ import org.springframework.stereotype.Repository;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 public class PostgresCuentaRepository implements CuentaRepositoryPort {
@@ -91,6 +93,8 @@ public class PostgresCuentaRepository implements CuentaRepositoryPort {
         } catch (SQLException e) {
             throw new RuntimeException("Error al buscar cuenta por CCC: " + e.getMessage(), e);
         }
+        
+        
     }
     
     @Override
@@ -190,4 +194,84 @@ public class PostgresCuentaRepository implements CuentaRepositoryPort {
 
         return cuenta;
     }
+    @Override
+        public List<Cuenta> buscarPorCliente(String clienteId) {
+            String sql = "SELECT c., cli., suc.calle as suc_calle, suc.ciudad as suc_ciudad, " +
+                "suc.codigo_postal as suc_codigo_postal, suc.director_dni " +
+                "FROM cuentas c " +
+                "JOIN clientes cli ON c.cliente_id = cli.id " +
+                "JOIN sucursales suc ON c.sucursal_numero = suc.numero " +
+                "WHERE c.cliente_id = ?";
+    
+    List<Cuenta> cuentas = new ArrayList<>();
+    
+    try (Connection conn = dataSource.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        
+        stmt.setString(1, clienteId);
+        ResultSet rs = stmt.executeQuery();
+        
+        while (rs.next()) {
+            cuentas.add(mapearACuenta(rs));
+        }
+        
+    } catch (SQLException e) {
+        throw new RuntimeException("Error al buscar cuentas por cliente: " + e.getMessage(), e);
+    }
+    
+    return cuentas;
+}
+
+    @Override
+public List<Cuenta> buscarTodas() {
+    String sql = "SELECT c., cli., suc.calle as suc_calle, suc.ciudad as suc_ciudad, " +
+                "suc.codigo_postal as suc_codigo_postal, suc.director_dni " +
+                "FROM cuentas c " +
+                "JOIN clientes cli ON c.cliente_id = cli.id " +
+                "JOIN sucursales suc ON c.sucursal_numero = suc.numero " +
+                "ORDER BY c.fecha_apertura DESC";
+    
+    List<Cuenta> cuentas = new ArrayList<>();
+    
+    try (Connection conn = dataSource.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        
+        ResultSet rs = stmt.executeQuery();
+        while (rs.next()) {
+            cuentas.add(mapearACuenta(rs));
+        }
+        
+    } catch (SQLException e) {
+        throw new RuntimeException("Error al buscar todas las cuentas: " + e.getMessage(), e);
+    }
+    
+    return cuentas;
+}
+
+    @Override
+        public List<Object[]> obtenerSaldosAgrupadosPorSucursal() {
+    String sql = "SELECT sucursal_numero, COUNT(*) as cantidad_cuentas, SUM(saldo_actual) as saldo_total " +
+                "FROM cuentas " +
+                "GROUP BY sucursal_numero " +
+                "ORDER BY saldo_total DESC";
+    
+    List<Object[]> resultados = new ArrayList<>();
+    
+    try (Connection conn = dataSource.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        
+        ResultSet rs = stmt.executeQuery();
+        while (rs.next()) {
+            String sucursalNumero = rs.getString("sucursal_numero");
+            Long cantidadCuentas = rs.getLong("cantidad_cuentas");
+            BigDecimal saldoTotal = rs.getBigDecimal("saldo_total");
+            resultados.add(new Object[]{sucursalNumero, cantidadCuentas, saldoTotal});
+        }
+        
+    } catch (SQLException e) {
+        throw new RuntimeException("Error al obtener saldos por sucursal: " + e.getMessage(), e);
+    }
+    
+    return resultados;
+}
 }

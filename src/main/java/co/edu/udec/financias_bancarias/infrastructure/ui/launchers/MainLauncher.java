@@ -41,7 +41,8 @@ public class MainLauncher {
             });
             
             btnReportes.addActionListener(e -> {
-                JOptionPane.showMessageDialog(mainFrame, "Flujo en desarrollo");
+                mainFrame.dispose();
+                ReportesLauncher.main(new String[]{});
             });
             
             panel.add(btnApertura);
@@ -54,3 +55,4 @@ public class MainLauncher {
         });
     }
 }
+
