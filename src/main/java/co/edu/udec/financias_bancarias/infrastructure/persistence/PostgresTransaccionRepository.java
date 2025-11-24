@@ -141,4 +141,28 @@ public class PostgresTransaccionRepository implements TransaccionRepositoryPort 
             rs.getString("descripcion")
         );
     }
+    
+    @Override
+        public List<Transaccion> buscarPorRangoDeFechas(LocalDateTime fechaInicio, LocalDateTime fechaFin) {
+            String sql = "SELECT * FROM transacciones WHERE fecha BETWEEN ? AND ? ORDER BY fecha DESC";
+    
+    List<Transaccion> transacciones = new ArrayList<>();
+    
+    try (Connection conn = dataSource.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        
+        stmt.setTimestamp(1, Timestamp.valueOf(fechaInicio));
+        stmt.setTimestamp(2, Timestamp.valueOf(fechaFin));
+        
+        ResultSet rs = stmt.executeQuery();
+        while (rs.next()) {
+            transacciones.add(mapearATransaccion(rs));
+        }
+        
+    } catch (SQLException e) {
+        throw new RuntimeException("Error al buscar transacciones por rango de fechas: " + e.getMessage(), e);
+    }
+    
+    return transacciones;
+}
 }
