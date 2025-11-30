@@ -13,7 +13,6 @@ public interface CuentaRepositoryPort {
     Cuenta buscarPorCCC(CodigoCuentaCliente ccc);
     void actualizar(Cuenta cuenta);
     
-    // NUEVOS MÉTODOS PARA REPORTES
     List<Cuenta> buscarPorCliente(String clienteId);
     List<Cuenta> buscarTodas();
     List<Object[]> obtenerSaldosAgrupadosPorSucursal();

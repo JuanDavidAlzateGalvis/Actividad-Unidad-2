@@ -26,6 +26,34 @@ public class PostgresTransaccionRepository implements TransaccionRepositoryPort 
 
     @Override
     public void guardar(Transaccion transaccion) {
+        String sql = "INSERT INTO transacciones (" +
+                    "cuenta_origen_banco_id, cuenta_origen_sucursal_id, cuenta_origen_numero_cuenta, " +
+                    "cuenta_destino_banco_id, cuenta_destino_sucursal_id, cuenta_destino_numero_cuenta, " +
+                    "monto, fecha, tipo, descripcion" +
+                    ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, transaccion.getCuentaOrigen().bancoId());
+            stmt.setString(2, transaccion.getCuentaOrigen().sucursalId());
+            stmt.setString(3, transaccion.getCuentaOrigen().numeroCuenta());
+
+            stmt.setString(4, transaccion.getCuentaDestino().bancoId());
+            stmt.setString(5, transaccion.getCuentaDestino().sucursalId());
+            stmt.setString(6, transaccion.getCuentaDestino().numeroCuenta());
+
+            stmt.setBigDecimal(7, transaccion.getMonto());
+            stmt.setTimestamp(8, Timestamp.valueOf(transaccion.getFecha()));
+            stmt.setString(9, transaccion.getTipo());
+            stmt.setString(10, transaccion.getDescripcion());
+
+            stmt.executeUpdate();
+            System.out.println("✅ Transacción guardada exitosamente");
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al guardar transacción: " + e.getMessage(), e);
+        }
     }
 
     @Override
@@ -143,7 +171,7 @@ public class PostgresTransaccionRepository implements TransaccionRepositoryPort 
     }
     
     @Override
-        public List<Transaccion> buscarPorRangoDeFechas(LocalDateTime fechaInicio, LocalDateTime fechaFin) {
+    public List<Transaccion> buscarPorRangoDeFechas(LocalDateTime fechaInicio, LocalDateTime fechaFin) {
             String sql = "SELECT * FROM transacciones WHERE fecha BETWEEN ? AND ? ORDER BY fecha DESC";
     
     List<Transaccion> transacciones = new ArrayList<>();
